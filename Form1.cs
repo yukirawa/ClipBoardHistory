@@ -1,79 +1,171 @@
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
+using System.IO;
+using YamlDotNet.Serialization;
+
 namespace myfarstAPP
 {
     public partial class Form1 : Form
     {
-        //windows‚Ì‹@”\‚ğg—p‚·‚é‚½‚ß‚ÌƒCƒ“ƒ|[ƒg
+        // WIndowsAPIã®ã‚¤ãƒ³ãƒãƒ¼ãƒˆ
         [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
         private static extern bool AddClipboardFormatListener(IntPtr hwnd);
         [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
         private static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
-        //windows‚©‚ç‘—‚ç‚ê‚Ä‚­‚éƒƒbƒZ[ƒW‚ğó‚¯æ‚é‚½‚ß‚ÌƒCƒ“ƒ|[ƒg
         private const int WM_CLIPBOARDUPDATE = 0x031D;
 
-        //windows‚ÌƒƒbƒZ[ƒW‚ğó‚¯æ‚é‚½‚ß‚Ìƒƒ\ƒbƒh
+        private readonly string _historyFilePath;
+        private bool _isExiting = false;
+
+        public Form1()
+        {
+            InitializeComponent();
+            _historyFilePath = Path.Combine(Application.StartupPath, "history.yaml");
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            AddClipboardFormatListener(this.Handle);
+            LoadHistory(); // èµ·å‹•æ™‚ã«è‡ªå‹•ã§èª­ã¿è¾¼ã‚€
+
+            notifyIcon1.Icon = this.Icon;
+            notifyIcon1.Text = "ClipBoardHistory";
+            notifyIcon1.Visible = true;
+        }
+
         protected override void WndProc(ref Message m)
         {
-            //win‚ÉŠî–{“I‚Èd–‚ğ‰Ÿ‚µ•t‚¯‚é
             base.WndProc(ref m);
-            //ƒNƒŠƒbƒvƒ{[ƒh‚ÌXV‚ª‚ ‚Á‚½ê‡
             if (m.Msg == WM_CLIPBOARDUPDATE)
             {
-                //ƒNƒŠƒbƒNƒ{[ƒh‚Ì“à—e‚ğæ“¾
                 if (Clipboard.ContainsText())
                 {
                     string clipboardText = Clipboard.GetText();
-                    // ƒŠƒXƒgƒ{ƒbƒNƒX‚Ìæ“ª‚ÉAƒRƒs[‚³‚ê‚½ƒeƒLƒXƒg‚ğ’Ç‰Á‚·‚é
-                    // ¦‚à‚µ“¯‚¶“à—e‚ªƒŠƒXƒg‚É‚È‚¯‚ê‚ÎA‚Æ‚¢‚¤ğŒ‚ğ’Ç‰Á‚·‚é‚ÆX‚É—Ç‚¢
-                    if (!listBox1.Items.Contains(clipboardText))
+                    if (!string.IsNullOrWhiteSpace(clipboardText) && !listBox1.Items.Contains(clipboardText))
                     {
                         listBox1.Items.Insert(0, clipboardText);
                     }
                 }
             }
         }
-        public Form1()
-        {
-            InitializeComponent();
-            //ƒtƒH[ƒ€‚ª‰æ–Ê‚É•\¦‚³‚ê‚½‚çƒNƒŠƒbƒvƒ{[‚Ç‚ÌŠÄ‹‚ğŠJn
-            //AddClipboardFormatListener(this.Handle);
-        }
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            AddClipboardFormatListener(this.Handle);
 
+        // ãƒ€ãƒ–ãƒ«ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆã®å‡¦ç†ã‚’è¿½åŠ 
+        private void listBox1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            // ãƒ€ãƒ–ãƒ«ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸé …ç›®ã‚’ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã«ã‚³ãƒ”ãƒ¼
+            CopySelectedItemToClipboard();
         }
 
-
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        // é¸æŠã•ã‚ŒãŸé …ç›®ã‚’ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã«ã‚³ãƒ”ãƒ¼ã™ã‚‹å‡¦ç†ã‚’ãƒ¡ã‚½ãƒƒãƒ‰ã¨ã—ã¦ç‹¬ç«‹
+        private void CopySelectedItemToClipboard()
         {
-            //‚à‚µƒŠƒXƒg‚Ì‰½‚©‚Ì€–Ú‚ª‘I‘ğ‚³‚ê‚½‚çi‹óU‚è–Xqj
             if (listBox1.SelectedItem != null)
             {
-                //‘I‘ğ‚³‚ê‚Ä‚¢‚é€–Ú‚ÌƒeƒLƒXƒg‚ğæ“¾
                 string selectedText = listBox1.SelectedItem.ToString();
-                //ƒeƒLƒXƒg‚ª–{“–‚É‘¶İ‚·‚é‚©Šm”F
                 if (!string.IsNullOrEmpty(selectedText))
                 {
-                    //‚»‚ÌƒeƒLƒXƒg‚ğƒNƒŠƒbƒvƒ{[ƒh‚Éİ’è
                     Clipboard.SetText(selectedText);
                 }
-                //‚»‚Ì‚Ä‚«‚·‚Æ‚ğƒNƒŠƒbƒvƒ{[ƒh‚ÉƒRƒs[‚·‚éB
-                Clipboard.SetText(selectedText);
             }
         }
 
-        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+
+        // ãƒ•ã‚©ãƒ¼ãƒ ãŒé–‰ã˜ã‚‰ã‚Œã‚ˆã†ã¨ã™ã‚‹ã¨ãã®å‡¦ç† (å¤‰æ›´ãªã—)
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            if (e.CloseReason == CloseReason.UserClosing && !_isExiting)
+            {
+                e.Cancel = true;
+                this.Hide();
+            }
+            else
+            {
+                SaveHistory(); // å®Œå…¨ã«çµ‚äº†ã™ã‚‹å‰ã«ä¿å­˜
+                RemoveClipboardFormatListener(this.Handle);
+            }
+            base.OnFormClosing(e);
+        }
+
+        // â˜…â˜…â˜… UIãƒœã‚¿ãƒ³ã®ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆ â˜…â˜…â˜…
+
+        // ã€Œè¡¨ç¤ºã€ãƒ¡ãƒ‹ãƒ¥ãƒ¼
+        private void toolStripMenuItem_Show_Click(object sender, EventArgs e)
+        {
+            this.Show();
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.WindowState = FormWindowState.Normal;
+            }
+            this.Activate();
+        }
+
+        // ã€Œçµ‚äº†ã€ãƒ¡ãƒ‹ãƒ¥ãƒ¼
+        private void toolStripMenuItem_Exit_Click(object sender, EventArgs e)
+        {
+            _isExiting = true;
             Application.Exit();
         }
 
-        private void contextMenuStrip1_Click(object sender, EventArgs e)
+        // ã€Œå±¥æ­´ã‚’ã‚¯ãƒªã‚¢ã€ãƒœã‚¿ãƒ³
+        private void btnClear_Click(object sender, EventArgs e)
         {
-            this.Show();
-            this.Activate();
+            if (MessageBox.Show("è¡¨ç¤ºä¸­ã®å±¥æ­´ã‚’ã™ã¹ã¦ã‚¯ãƒªã‚¢ã—ã¾ã™ã‹ï¼Ÿ\nï¼ˆãƒ•ã‚¡ã‚¤ãƒ«ã¯å‰Šé™¤ã•ã‚Œã¾ã›ã‚“ï¼‰", "ç¢ºèª", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+                listBox1.Items.Clear();
+            }
+        }
+
+        // ã€Œå±¥æ­´ã‚’ä¿å­˜ã€ãƒœã‚¿ãƒ³
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            SaveHistory();
+            MessageBox.Show("ç¾åœ¨ã®å±¥æ­´ã‚’ history.yaml ã«ä¿å­˜ã—ã¾ã—ãŸã€‚", "ä¿å­˜å®Œäº†", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        
+        // ã€Œå±¥æ­´ã‚’èª­ã¿è¾¼ã¿ã€ãƒœã‚¿ãƒ³
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("history.yaml ã‹ã‚‰å±¥æ­´ã‚’èª­ã¿è¾¼ã¿ã¾ã™ã€‚\nç¾åœ¨ã®ãƒªã‚¹ãƒˆã¯ã‚¯ãƒªã‚¢ã•ã‚Œã¾ã™ãŒã€ã‚ˆã‚ã—ã„ã§ã™ã‹ï¼Ÿ", "ç¢ºèª", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                listBox1.Items.Clear(); // ã„ã£ãŸã‚“ãƒªã‚¹ãƒˆã‚’ã‚¯ãƒªã‚¢
+                LoadHistory();      // ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã‚€
+            }
+        }
+
+
+        //YAMLé–¢é€£
+        private void SaveHistory()
+        {
+            var history = new List<string>();
+            foreach (var item in listBox1.Items)
+            {
+                history.Add(item.ToString());
+            }
+
+            var serializer = new SerializerBuilder().Build();
+            var yaml = serializer.Serialize(history);
+
+            File.WriteAllText(_historyFilePath, yaml);
+        }
+
+        private void LoadHistory()
+        {
+            if (File.Exists(_historyFilePath))
+            {
+                try
+                {
+                    var yaml = File.ReadAllText(_historyFilePath);
+                    var deserializer = new DeserializerBuilder().Build();
+                    var history = deserializer.Deserialize<List<string>>(yaml);
+
+                    if (history != null)
+                    {
+                        listBox1.Items.AddRange(history.ToArray());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("å±¥æ­´ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸã€‚\n" + ex.Message, "ã‚¨ãƒ©ãƒ¼", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
     }
-
 }
