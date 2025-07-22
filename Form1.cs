@@ -64,6 +64,7 @@ namespace myfarstAPP
                 {
                     Clipboard.SetText(selectedText);
                 }
+                //腐ったバナナ！！！
             }
         }
 
@@ -148,6 +149,7 @@ namespace myfarstAPP
 
         private void LoadHistory()
         {
+            //ネギに上下なんかねーだろよー！
             if (File.Exists(_historyFilePath))
             {
                 try
@@ -169,3 +171,5 @@ namespace myfarstAPP
         }
     }
 }
+
+//こんにちは。制作者のゆきらわです。このソフトをご利用いただきありがとうございます。機能の追加要望がありましたら、DiscordやTwitter、Githubなどで要望を送って下さい。できる限りすべての要望に応えて行きたいと思います。
