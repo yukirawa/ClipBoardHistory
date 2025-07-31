@@ -14,6 +14,7 @@ namespace myfarstAPP
 
         private readonly string _historyFilePath;
         private bool _isExiting = false;
+        private List<ClipboardItem> _clipboardItems = new List<ClipboardItem>();
 
         public Form1()
         {
@@ -100,8 +101,21 @@ namespace myfarstAPP
         // 「終了」メニュー
         private void toolStripMenuItem_Exit_Click(object sender, EventArgs e)
         {
-            _isExiting = true;
-            Application.Exit();
+            try
+            {
+                _isExiting = true;
+                SaveHistory(); // 終了前に履歴を保存
+                RemoveClipboardFormatListener(this.Handle); // クリップボードリスナーを解除
+                notifyIcon1.Visible = false; // 通知アイコンを非表示
+                notifyIcon1.Dispose(); // 通知アイコンのリソースを解放
+                Application.Exit();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"アプリケーションの終了中にエラーが発生しました: {ex.Message}", "エラー",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(1); // 強制終了
+            }
         }
 
         // 「履歴をクリア」ボタン
