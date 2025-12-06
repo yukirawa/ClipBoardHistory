@@ -1,185 +1,149 @@
 using System;
-using System.IO;
-using System.Linq;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Timers;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using YamlDotNet.Serialization;
 
 namespace myfarstAPP
 {
     public partial class Form1 : Form
     {
-        [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+        // --- 低レイヤー: Windows API 定義 ---
+        [DllImport("user32.dll", SetLastError = true)]
         private static extern bool AddClipboardFormatListener(IntPtr hwnd);
-        [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+
+        [DllImport("user32.dll", SetLastError = true)]
         private static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
+
         private const int WM_CLIPBOARDUPDATE = 0x031D;
+        // ------------------------------------
 
         private readonly string _historyFilePath;
         private bool _isExiting = false;
-        private string _lastClipboardText = string.Empty;
-
-        // 内部で管理する履歴。UI に依存させずバックグラウンド処理を軽くする。
-        private readonly List<string> _history = new List<string>();
-        private readonly object _historyLock = new object();
-        private const int MAX_HISTORY = 200;
-
-        // デバウンスと非同期保存用
-        private readonly System.Timers.Timer _debounceTimer;
-        private readonly System.Timers.Timer _saveTimer;
-        private string _pendingText;
-        private volatile bool _isDirty = false;
+        private const int MaxHistoryCount = 50; // 最適化: 履歴の最大保持数
 
         public Form1()
         {
             InitializeComponent();
-            _historyFilePath = Path.Combine(Application.StartupPath, "history.txt");
-
-            // デバウンス: 短時間に来る連続イベントをまとめる (300ms)
-            _debounceTimer = new System.Timers.Timer(300) { AutoReset = false };
-            _debounceTimer.Elapsed += DebounceTimer_Elapsed;
-
-            // 定期保存: 変更があればまとめて保存する (60秒)
-            _saveTimer = new System.Timers.Timer(60_000) { AutoReset = true };
-            _saveTimer.Elapsed += SaveTimer_Elapsed;
+            _historyFilePath = Path.Combine(Application.StartupPath, "history.yaml");
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // Windowsに「クリップボードが変わったら教えて」と登録
             AddClipboardFormatListener(this.Handle);
+
             LoadHistory();
+            UpdateStatus();
 
             notifyIcon1.Icon = this.Icon;
-            notifyIcon1.Text = "ClipBoardHistory";
+            notifyIcon1.Text = "ClipBoardHistory v1.1";
             notifyIcon1.Visible = true;
-
-            // 起動時は UI を内部履歴から構築
-            RefreshListBoxFromHistory();
-
-            // 保存タイマー開始
-            _saveTimer.Start();
         }
 
+        // --- 低レイヤー: OSからのメッセージ処理 ---
         protected override void WndProc(ref Message m)
         {
+            if (m.Msg == WM_CLIPBOARDUPDATE)
+            {
+                // 変更通知が来たら処理を行う
+                OnClipboardUpdate();
+            }
             base.WndProc(ref m);
-            if (m.Msg != WM_CLIPBOARDUPDATE)
-                return;
+        }
 
-            // クリップボードアクセスは例外が発生することがあるため保護する
-            string clipboardText;
+        private void OnClipboardUpdate()
+        {
             try
             {
-                if (!Clipboard.ContainsText())
-                    return;
-                clipboardText = Clipboard.GetText();
+                // クリップボードにテキストが含まれているか確認
+                if (Clipboard.ContainsText())
+                {
+                    string text = Clipboard.GetText();
+
+                    // 空白や、直前の履歴と同じ内容は無視（自己ループ防止＆最適化）
+                    if (string.IsNullOrWhiteSpace(text)) return;
+                    if (listBox1.Items.Count > 0 && listBox1.Items[0].ToString() == text) return;
+
+                    AddHistoryItem(text);
+                }
             }
-            catch
+            catch (ExternalException)
             {
-                // 他プロセスがクリップボードをロックしている等、失敗時は何もしない
-                return;
+                // 他のアプリがクリップボードをロックしている場合は無視する（クラッシュ防止）
             }
-
-            if (string.IsNullOrWhiteSpace(clipboardText) || clipboardText == _lastClipboardText)
-                return;
-
-            _lastClipboardText = clipboardText;
-
-            // デバウンス: pending にセットしてタイマーを再起動
-            _pendingText = clipboardText;
-            _debounceTimer.Stop();
-            _debounceTimer.Start();
+            catch (Exception ex)
+            {
+                // その他の予期せぬエラーはログに出すか無視
+                System.Diagnostics.Debug.WriteLine($"Clipboard Error: {ex.Message}");
+            }
         }
 
-        private void DebounceTimer_Elapsed(object? sender, ElapsedEventArgs e)
+        // 履歴追加ロジック（UI操作の最適化）
+        private void AddHistoryItem(string text)
         {
-            var text = _pendingText;
-            if (string.IsNullOrEmpty(text))
-                return;
+            listBox1.BeginUpdate(); // 描画を一時停止して高速化
 
-            AddToHistory(text);
-        }
-
-        private void AddToHistory(string clipboardText)
-        {
-            bool added = false;
-            lock (_historyLock)
+            // すでにリストにある場合は削除して先頭に持ってくる（順序更新）
+            if (listBox1.Items.Contains(text))
             {
-                int existing = _history.IndexOf(clipboardText);
-                if (existing == 0)
-                {
-                    // すでに先頭にある -> 変更なし
-                }
-                else
-                {
-                    if (existing > 0)
-                        _history.RemoveAt(existing);
-
-                    _history.Insert(0, clipboardText);
-
-                    if (_history.Count > MAX_HISTORY)
-                        _history.RemoveRange(MAX_HISTORY, _history.Count - MAX_HISTORY);
-
-                    _isDirty = true;
-                    added = true;
-                }
+                listBox1.Items.Remove(text);
             }
 
-            if (added)
+            // 先頭に追加
+            listBox1.Items.Insert(0, text);
+
+            // 最大件数を超えたら古いものを削除（メモリ節約）
+            while (listBox1.Items.Count > MaxHistoryCount)
             {
-                // UI は表示中のみ更新
-                if (this.Visible && this.WindowState != FormWindowState.Minimized && listBox1 != null)
-                {
-                    try
-                    {
-                        this.Invoke((Action)(() =>
-                        {
-                            listBox1.BeginUpdate();
-                            try
-                            {
-                                // 同じロジックで UI を更新
-                                listBox1.Items.Insert(0, clipboardText);
-                                while (listBox1.Items.Count > MAX_HISTORY)
-                                    listBox1.Items.RemoveAt(listBox1.Items.Count - 1);
-                            }
-                            finally
-                            {
-                                listBox1.EndUpdate();
-                            }
-                        }));
-                    }
-                    catch
-                    {
-                        // Invoke に失敗した場合は無視する（バックグラウンド時など）
-                    }
-                }
+                listBox1.Items.RemoveAt(listBox1.Items.Count - 1);
             }
+
+            listBox1.EndUpdate(); // 描画再開
         }
+
+        // --- UIイベントハンドラ ---
 
         private void listBox1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (listBox1.SelectedItem is string selectedText && !string.IsNullOrEmpty(selectedText))
-                Clipboard.SetText(selectedText);
+            CopySelectedItemToClipboard();
         }
 
+        private void CopySelectedItemToClipboard()
+        {
+            if (listBox1.SelectedItem != null)
+            {
+                string selectedText = listBox1.SelectedItem.ToString();
+                if (!string.IsNullOrEmpty(selectedText))
+                {
+                    try
+                    {
+                        Clipboard.SetText(selectedText);
+                        // ここでSetTextすると再度WndProcが呼ばれるが、
+                        // OnClipboardUpdate内の「直前と同じなら無視」で弾かれるため安全
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("クリップボードへのコピーに失敗しました。\n" + ex.Message);
+                    }
+                }
+            }
+        }
+
+        // 終了・保存処理
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing && !_isExiting)
             {
                 e.Cancel = true;
-                this.Hide();
+                this.Hide(); // 最小化
             }
             else
             {
-                // 強制終了時は同期保存してから終了
-                SaveHistorySync();
-                RemoveClipboardFormatListener(this.Handle);
-
-                _saveTimer.Stop();
-                _debounceTimer.Stop();
-                _saveTimer.Dispose();
-                _debounceTimer.Dispose();
+                // アプリ終了時
+                RemoveClipboardFormatListener(this.Handle); // 監視解除
+                SaveHistory();
             }
             base.OnFormClosing(e);
         }
@@ -188,165 +152,103 @@ namespace myfarstAPP
         {
             this.Show();
             if (this.WindowState == FormWindowState.Minimized)
+            {
                 this.WindowState = FormWindowState.Normal;
+            }
             this.Activate();
-
-            // 表示時に UI を内部履歴で同期
-            RefreshListBoxFromHistory();
         }
 
         private void toolStripMenuItem_Exit_Click(object sender, EventArgs e)
         {
-            try
-            {
-                _isExiting = true;
-                SaveHistorySync();
-                RemoveClipboardFormatListener(this.Handle);
-                notifyIcon1.Visible = false;
-                notifyIcon1.Dispose();
-                Application.Exit();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"アプリケーションの終了中にエラーが発生しました: {ex.Message}", "エラー",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(1);
-            }
+            _isExiting = true;
+            Application.Exit();
         }
 
         private void btnClear_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("表示中の履歴をすべてクリアしますか？\n（ファイルは削除されません）", "確認", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            if (MessageBox.Show("履歴をすべてクリアしますか？", "確認",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                lock (_historyLock)
-                {
-                    _history.Clear();
-                    _isDirty = true;
-                }
-
-                if (listBox1 != null)
-                    listBox1.Items.Clear();
+                listBox1.Items.Clear();
             }
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            // ユーザー操作による即時保存は非同期で行う
-            _ = SaveHistoryAsync();
-            MessageBox.Show("現在の履歴を history.txt に保存しました。", "保存完了", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            SaveHistory();
+            MessageBox.Show("履歴を保存しました。", "完了", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void btnLoad_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("history.txt から履歴を読み込みます。\n現在のリストはクリアされますが、よろしいですか？", "確認", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("保存された履歴を読み込みますか？\n現在のリストは上書きされます。", "確認",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                lock (_historyLock)
-                {
-                    _history.Clear();
-                    _isDirty = true;
-                }
                 LoadHistory();
-                RefreshListBoxFromHistory();
             }
         }
 
-        private void SaveTimer_Elapsed(object? sender, ElapsedEventArgs e)
+        // --- ファイル操作 (YAML) ---
+
+        private void SaveHistory()
         {
-            if (!_isDirty)
-                return;
-
-            // 非同期で保存
-            _ = SaveHistoryAsync();
-        }
-
-        private async Task SaveHistoryAsync()
-        {
-            string[] snapshot;
-            lock (_historyLock)
-            {
-                snapshot = _history.ToArray();
-                _isDirty = false; // 保存を試みるためフラグを落とす
-            }
-
             try
             {
-                // 行単位の簡易フォーマットへ変更
-                await File.WriteAllLinesAsync(_historyFilePath, snapshot).ConfigureAwait(false);
-            }
-            catch
-            {
-                // 保存失敗時はフラグを再セットして次回試行させる
-                _isDirty = true;
-            }
-        }
+                var history = new List<string>();
+                foreach (var item in listBox1.Items)
+                {
+                    history.Add(item.ToString());
+                }
 
-        private void SaveHistorySync()
-        {
-            string[] snapshot;
-            lock (_historyLock)
-            {
-                snapshot = _history.ToArray();
-                _isDirty = false;
-            }
+                var serializer = new SerializerBuilder().Build();
+                var yaml = serializer.Serialize(history);
 
-            try
-            {
-                File.WriteAllLines(_historyFilePath, snapshot);
+                File.WriteAllText(_historyFilePath, yaml);
             }
-            catch
+            catch (Exception ex)
             {
-                // 最終手段として無視
+                MessageBox.Show($"保存エラー: {ex.Message}", "エラー");
             }
         }
 
         private void LoadHistory()
         {
-            if (!File.Exists(_historyFilePath))
-                return;
+            if (!File.Exists(_historyFilePath)) return;
 
             try
             {
-                var lines = File.ReadAllLines(_historyFilePath)
-                    .Where(l => !string.IsNullOrWhiteSpace(l))
-                    .Select(l => l.Trim())
-                    .ToList();
+                var yaml = File.ReadAllText(_historyFilePath);
+                var deserializer = new DeserializerBuilder().Build();
+                var history = deserializer.Deserialize<List<string>>(yaml);
 
-                lock (_historyLock)
+                listBox1.BeginUpdate();
+                listBox1.Items.Clear();
+                if (history != null)
                 {
-                    _history.Clear();
-                    foreach (var item in lines)
-                        _history.Add(item);
+                    // 読み込んだデータが多すぎる場合は最新のMaxHistoryCount件だけにする
+                    int start = 0;
+                    if (history.Count > MaxHistoryCount)
+                    {
+                        start = history.Count - MaxHistoryCount;
+                    }
 
-                    if (_history.Count > MAX_HISTORY)
-                        _history.RemoveRange(MAX_HISTORY, _history.Count - MAX_HISTORY);
+                    for (int i = start; i < history.Count; i++)
+                    {
+                        listBox1.Items.Add(history[i]);
+                    }
                 }
+                listBox1.EndUpdate();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("履歴ファイルの読み込みに失敗しました。\n" + ex.Message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // 起動時のエラーはユーザーを驚かせないようログ出力程度にするか、控えめに
+                System.Diagnostics.Debug.WriteLine($"読み込みエラー: {ex.Message}");
             }
         }
 
-        // 内部履歴から ListBox を更新するユーティリティ
-        private void RefreshListBoxFromHistory()
+        private void UpdateStatus()
         {
-            if (listBox1 == null)
-                return;
-
-            listBox1.BeginUpdate();
-            try
-            {
-                listBox1.Items.Clear();
-                lock (_historyLock)
-                {
-                    if (_history.Count > 0)
-                        listBox1.Items.AddRange(_history.ToArray());
-                }
-            }
-            finally
-            {
-                listBox1.EndUpdate();
-            }
+            // 将来的にステータスバーなどを実装する場合に使用
         }
     }
 }
