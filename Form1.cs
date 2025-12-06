@@ -12,6 +12,8 @@ namespace myfarstAPP
         private const int WM_CLIPBOARDUPDATE = 0x031D;
 
         private readonly string _historyFilePath;
+        private readonly ISerializer _serializer = new SerializerBuilder().Build();
+        private readonly IDeserializer _deserializer = new DeserializerBuilder().Build();
         private bool _isExiting = false;
         private string _lastClipboardText = string.Empty;
 
@@ -34,28 +36,21 @@ namespace myfarstAPP
         protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
-            if (m.Msg == WM_CLIPBOARDUPDATE && Clipboard.ContainsText())
+            if (m.Msg != WM_CLIPBOARDUPDATE || !Clipboard.ContainsText())
+                return;
+
+            string clipboardText = Clipboard.GetText();
+            if (!string.IsNullOrWhiteSpace(clipboardText) && clipboardText != _lastClipboardText)
             {
-                string clipboardText = Clipboard.GetText();
-                if (!string.IsNullOrWhiteSpace(clipboardText) && clipboardText != _lastClipboardText)
-                {
-                    _lastClipboardText = clipboardText;
-                    listBox1.Items.Insert(0, clipboardText);
-                }
+                _lastClipboardText = clipboardText;
+                listBox1.Items.Insert(0, clipboardText);
             }
         }
 
         private void listBox1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            CopySelectedItemToClipboard();
-        }
-
-        private void CopySelectedItemToClipboard()
-        {
             if (listBox1.SelectedItem is string selectedText && !string.IsNullOrEmpty(selectedText))
-            {
                 Clipboard.SetText(selectedText);
-            }
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -77,9 +72,7 @@ namespace myfarstAPP
         {
             this.Show();
             if (this.WindowState == FormWindowState.Minimized)
-            {
                 this.WindowState = FormWindowState.Normal;
-            }
             this.Activate();
         }
 
@@ -105,9 +98,7 @@ namespace myfarstAPP
         private void btnClear_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("表示中の履歴をすべてクリアしますか？\n（ファイルは削除されません）", "確認", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
-            {
                 listBox1.Items.Clear();
-            }
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -128,30 +119,26 @@ namespace myfarstAPP
         private void SaveHistory()
         {
             var history = listBox1.Items.Cast<string>().ToList();
-            var serializer = new SerializerBuilder().Build();
-            var yaml = serializer.Serialize(history);
+            var yaml = _serializer.Serialize(history);
             File.WriteAllText(_historyFilePath, yaml);
         }
 
         private void LoadHistory()
         {
-            if (File.Exists(_historyFilePath))
-            {
-                try
-                {
-                    var yaml = File.ReadAllText(_historyFilePath);
-                    var deserializer = new DeserializerBuilder().Build();
-                    var history = deserializer.Deserialize<List<string>>(yaml);
+            if (!File.Exists(_historyFilePath))
+                return;
 
-                    if (history != null)
-                    {
-                        listBox1.Items.AddRange(history.ToArray());
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("履歴ファイルの読み込みに失敗しました。\n" + ex.Message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+            try
+            {
+                var yaml = File.ReadAllText(_historyFilePath);
+                var history = _deserializer.Deserialize<List<string>>(yaml);
+
+                if (history?.Count > 0)
+                    listBox1.Items.AddRange(history.ToArray());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("履歴ファイルの読み込みに失敗しました。\n" + ex.Message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
