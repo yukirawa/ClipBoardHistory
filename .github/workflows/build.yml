@@ -1,0 +1,43 @@
+name: Build and Release
+
+# いつ動くか：mainブランチにプッシュされたとき、またはタグ（v1.0など）がついたとき
+on:
+  push:
+    branches: [ "master" ]
+    tags: [ "v*" ]
+  workflow_dispatch: # GitHubの画面から手動で動かせるようにする
+
+jobs:
+  build:
+    runs-on: windows-latest # Windows環境でビルドする
+
+    steps:
+    # 1. コードを取得
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. .NET 9 をセットアップ
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    # 3. ビルドと発行（単一ファイル化コマンド）
+    - name: Publish Single File EXE
+      run: dotnet publish myfarstAPP.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o ./publish_output
+
+    # 4. 成果物（EXE）をGitHub Actionsの画面にアップロード（一時保存）
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ClipBoardHistory-App
+        path: ./publish_output/myfarstAPP.exe
+
+    # 5. タグ（v1.0など）がついている場合のみ、Releaseページを作成して公開
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./publish_output/myfarstAPP.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
