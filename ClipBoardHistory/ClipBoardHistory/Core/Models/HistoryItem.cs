@@ -1,34 +1,49 @@
 using System;
 
-namespace ClipBoardHistory.Models
+namespace ClipBoardHistory.Core.Models;
+
+/// <summary>
+/// 履歴データの種類
+/// </summary>
+public enum ClipboardItemType
+{
+    Text = 0,
+    Image = 1,
+    File = 2 // 将来用（ファイルコピーの履歴など）
+}
+
+/// <summary>
+/// 履歴アイテム1件を表すモデル
+/// </summary>
+public class HistoryItem
 {
     /// <summary>
-    /// クリップボード履歴の一件を表すデータ構造
+    /// データベース上の主キー
     /// </summary>
-    public class HistoryItem
-    {
-        /// <summary>データベース上のユニークID (主キー)</summary>
-        public int Id { get; set; }
+    public long Id { get; set; }
 
-        /// <summary>クリップボードデータの種類 (Text, Image, FileDropなど)</summary>
-        public string Type { get; set; } = string.Empty;
+    /// <summary>
+    /// テキストデータ（画像の場合は空、またはOCRテキストなど）
+    /// </summary>
+    public string Content { get; set; } = string.Empty;
 
-        /// <summary>コピーが実行された日時</summary>
-        public DateTime Timestamp { get; set; } = DateTime.Now;
+    /// <summary>
+    /// データの種類
+    /// </summary>
+    public ClipboardItemType Type { get; set; }
 
-        /// <summary>UIで表示する概要テキスト (画像やファイルの場合はファイル名など)</summary>
-        public string PreviewText { get; set; } = string.Empty;
+    /// <summary>
+    /// 作成日時
+    /// </summary>
+    public DateTime CreatedAt { get; set; }
 
-        /// <summary>データ本体が保存されているファイルパス (大容量データの場合)</summary>
-        public string DataPath { get; set; } = string.Empty;
+    /// <summary>
+    /// 画像キャッシュへのフルパス（Type=Imageのときのみ使用）
+    /// </summary>
+    public string? ImagePath { get; set; }
 
-        /// <summary>コンテンツのハッシュ値 (重複チェック用)</summary>
-        public string HashValue { get; set; } = string.Empty;
-
-        /// <summary>ピン留めされているか (0=False, 1=True)</summary>
-        public bool IsPinned { get; set; }
-
-        /// <summary>データ本体の実際の値 (DBに保存せず、メモリ上でのみ使用)</summary>
-        public object? Data { get; set; }
-    }
+    /// <summary>
+    /// 検索用インデックス（軽量化のため、表示用とは別に持つ場合に使用）
+    /// </summary>
+    public string SearchIndex { get; set; } = string.Empty;
 }

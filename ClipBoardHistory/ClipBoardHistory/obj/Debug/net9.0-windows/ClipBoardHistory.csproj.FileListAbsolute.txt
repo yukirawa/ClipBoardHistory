@@ -4,7 +4,6 @@ C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHi
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.AssemblyInfo.cs
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.csproj.CoreCompileInputs.cache
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.sourcelink.json
-C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.UI.Form1.resources
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.csproj.AssemblyReference.cache
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\ClipBoardHistory.exe
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\ClipBoardHistory.deps.json
@@ -22,3 +21,4 @@ C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHi
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.pdb
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.genruntimeconfig.cache
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ref\ClipBoardHistory.dll
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.Form1.resources

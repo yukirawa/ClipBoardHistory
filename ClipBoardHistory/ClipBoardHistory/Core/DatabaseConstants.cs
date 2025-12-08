@@ -1,48 +1,25 @@
 ﻿using System;
 using System.IO;
 
-namespace ClipBoardHistory.Core
+namespace ClipBoardHistory.Core;
+
+public static class DatabaseConstants
 {
-    /// <summary>
-    /// データベースとファイルパスに関する定数を管理するクラス
-    /// </summary>
-    public static class DatabaseConstants
-    {
-        // アプリケーションIDと名前
-        private const string AppName = "ClipBoardHistory";
+    // アプリのデータ保存フォルダ (%LocalAppData%/ClipBoardHistoryV2)
+    public static readonly string AppDataFolder = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "ClipBoardHistoryV2"
+    );
 
-        /// <summary>SQLiteデータベースファイルのフルパスを取得します。</summary>
-        public static string DatabasePath
-        {
-            get
-            {
-                // AppData\Local\<AppName> フォルダを取得
-                string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                string appDirectory = Path.Combine(localAppData, AppName);
+    // 画像キャッシュフォルダ
+    public static readonly string ImageCacheFolder = Path.Combine(AppDataFolder, "Cache");
 
-                // ディレクトリが存在しない場合は作成
-                if (!Directory.Exists(appDirectory))
-                {
-                    Directory.CreateDirectory(appDirectory);
-                }
+    // データベースファイルのパス
+    public static readonly string DbFilePath = Path.Combine(AppDataFolder, "history.db");
 
-                // データベースファイルのパスを結合
-                return Path.Combine(appDirectory, "history.sqlite");
-            }
-        }
+    // 接続文字列
+    public static readonly string ConnectionString = $"Data Source={DbFilePath};Version=3;";
 
-        /// <summary>画像や大容量テキストデータなどを保存するキャッシュディレクトリのパスを取得します。</summary>
-        public static string DataCacheDirectory
-        {
-            get
-            {
-                string path = Path.Combine(Path.GetDirectoryName(DatabasePath)!, "Cache");
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-                return path;
-            }
-        }
-    }
+    // テーブル名
+    public const string TableName = "History";
 }

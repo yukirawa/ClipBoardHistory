@@ -1,91 +1,104 @@
 using System;
 using System.Windows.Forms;
-using ClipBoardHistory.Models;
-using ClipBoardHistory.Services;
+using ClipBoardHistory.Core.Models;
+using ClipBoardHistory.Core.Services;
 
-namespace ClipBoardHistory.UI
+namespace ClipBoardHistory
 {
-    // Form1クラスをinternalからpublicに変更 (デザイナとの連携のため)
     public partial class Form1 : Form
     {
-        // 接続戦略に基づき、ClipboardServiceのインスタンスを保持
-        private readonly ClipboardService _clipboardService;
+        // Core機能のインスタンス
+        private readonly ClipboardMonitor _monitor;
+        private readonly DatabaseManager _dbManager;
 
-        // Visual Studio デザイナー向け
         public Form1()
         {
+            // ここで Designer.cs の InitializeComponent を呼び出します
             InitializeComponent();
-        }
 
-        // Program.cs からサービスを受け取るためのメインのコンストラクタ
-        public Form1(ClipboardService service) : this()
-        {
-            _clipboardService = service;
+            // 1. データベースの準備
+            _dbManager = new DatabaseManager();
+            try
+            {
+                _dbManager.Initialize();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"DB初期化エラー: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
-            // 接続戦略に基づき、サービスイベントを購読
-            _clipboardService.NewClipAdded += ClipboardService_NewClipAdded;
+            // 2. 監視機能の準備
+            _monitor = new ClipboardMonitor();
+            _monitor.ClipboardChanged += Monitor_ClipboardChanged;
 
-            // フォームが閉じるときに監視を停止するイベントを登録
-            this.FormClosing += Form1_FormClosing;
-
-            // UIがロードされたら、既存の履歴をロード
-            this.Load += Form1_Load;
-
-            this.Text = "ClipBoardHistory v2.0"; // タイトル設定
-        }
-
-        private void Form1_Load(object? sender, EventArgs e)
-        {
-            // 初回ロード時に既存の履歴をロード
-            LoadInitialHistory();
+            // アプリ終了時の処理登録
+            this.FormClosing += (s, e) => _monitor.Dispose();
         }
 
         /// <summary>
-        /// フォームが閉じられる前に、クリップボード監視を停止します。
+        /// フォームが表示されたタイミングで監視を開始
         /// </summary>
-        private void Form1_FormClosing(object? sender, FormClosingEventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
-            // アプリケーションの終了時に低レイヤーの処理をクリーンアップ
-            _clipboardService.StopMonitoring();
-            // イベント購読の解除
-            _clipboardService.NewClipAdded -= ClipboardService_NewClipAdded;
+            base.OnLoad(e);
+            _monitor.Start();
+            System.Diagnostics.Debug.WriteLine("=== 監視を開始しました ===");
         }
 
         /// <summary>
-        /// サービスから新しいクリップが追加された通知を受け取り、UIを更新します。
+        /// クリップボードに変更があったときに呼ばれるイベントハンドラ
         /// </summary>
-        private void ClipboardService_NewClipAdded(object? sender, HistoryItem newItem)
+        private void Monitor_ClipboardChanged(object? sender, EventArgs e)
         {
-            // UIコントロールを操作するためには、Invokeが必要です（別スレッドからの呼び出しのため）
+            // 監視スレッドから呼ばれるため、UIスレッドで処理するようにInvokeする
             if (this.InvokeRequired)
             {
-                // UIスレッドで実行するための Invoke
-                this.Invoke(new Action(() => UpdateHistoryList(newItem)));
+                this.BeginInvoke(new Action(() => ProcessClipboardData()));
             }
             else
             {
-                UpdateHistoryList(newItem);
+                ProcessClipboardData();
             }
         }
 
         /// <summary>
-        /// 履歴リストを更新するUIロジック（UIスレッドで実行される）
+        /// 実際にクリップボードの中身を取り出してDBに保存する処理
         /// </summary>
-        private void UpdateHistoryList(HistoryItem newItem)
+        private void ProcessClipboardData()
         {
-            // TODO: UIコンポーネント (例: ListBox) に新しいアイテムを追加する具体的なロジックを実装
-            // 今後、UI/Form1.Designer.csで定義した lvHistory を操作するロジックをここに書きます。
-            Console.WriteLine($"[UI Update] 新しいクリップを追加: {newItem.PreviewText}");
-        }
+            try
+            {
+                // --- テキストデータの処理 ---
+                if (Clipboard.ContainsText())
+                {
+                    string text = Clipboard.GetText();
+                    if (string.IsNullOrEmpty(text)) return;
 
-        /// <summary>
-        /// データベースからすべての履歴をロードし、UIに表示します。
-        /// </summary>
-        private void LoadInitialHistory()
-        {
-            var historyList = _clipboardService.GetAllHistory();
-            // TODO: historyListを使ってUIコンポーネントを初期化するロジックを実装
-            Console.WriteLine($"[UI Init] 既存の履歴 {historyList.Count} 件をロードしました。");
+                    // 保存用データの作成
+                    var item = new HistoryItem
+                    {
+                        Content = text,
+                        Type = ClipboardItemType.Text,
+                        CreatedAt = DateTime.Now,
+                        SearchIndex = text
+                    };
+
+                    // DBへ保存
+                    _dbManager.Save(item);
+
+                    // デバッグ出力
+                    System.Diagnostics.Debug.WriteLine($"[保存完了] テキスト: {text.Substring(0, Math.Min(text.Length, 20))}...");
+                }
+                // --- 画像データの処理 (TODO) ---
+                else if (Clipboard.ContainsImage())
+                {
+                    System.Diagnostics.Debug.WriteLine("[検知] 画像がコピーされました（保存処理は未実装）");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"読み取りエラー: {ex.Message}");
+            }
         }
     }
 }
