@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ClipBoardHistory")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+84165e09877a76b25def0663631ce2b24fe82ccb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1c7341807b1f7840637bbf263e9a4123f7fcae72")]
 [assembly: System.Reflection.AssemblyProductAttribute("ClipBoardHistory")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ClipBoardHistory")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
