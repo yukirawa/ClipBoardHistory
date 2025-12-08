@@ -22,3 +22,5 @@ C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHi
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.genruntimeconfig.cache
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ref\ClipBoardHistory.dll
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.Form1.resources
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.UI..resources
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.UI.Controls.HistoryCard.resources
