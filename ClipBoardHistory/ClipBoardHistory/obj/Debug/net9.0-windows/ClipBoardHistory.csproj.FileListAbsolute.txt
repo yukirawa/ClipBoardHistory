@@ -1,0 +1,8 @@
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.UI.Program.resources
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.csproj.GenerateResource.cache
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.AssemblyInfoInputs.cache
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.AssemblyInfo.cs
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.csproj.CoreCompileInputs.cache
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.sourcelink.json
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.UI.Form1.resources

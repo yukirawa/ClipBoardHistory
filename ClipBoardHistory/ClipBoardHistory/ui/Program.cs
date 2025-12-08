@@ -1,17 +1,27 @@
-namespace ClipBoardHistory
+using System;
+using System.Windows.Forms;
+using ClipBoardHistory.Services;
+
+namespace ClipBoardHistory.UI
 {
     internal static class Program
     {
         /// <summary>
-        ///  The main entry point for the application.
+        /// アプリケーションのメイン エントリ ポイントです。
         /// </summary>
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            // アプリケーションが .NET 9.0 での推奨設定を使用するように設定
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            // クリップボードサービスをインスタンス化し、監視を開始
+            var clipboardService = new ClipboardService();
+            clipboardService.StartMonitoring();
+
+            // メインフォームをサービスインスタンスを渡して起動
+            Application.Run(new Form1(clipboardService));
         }
     }
 }
