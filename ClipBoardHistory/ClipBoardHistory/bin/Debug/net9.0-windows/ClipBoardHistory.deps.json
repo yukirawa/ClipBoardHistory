@@ -6,6 +6,14 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v9.0": {
+      "ClipBoardHistory/1.0.0": {
+        "dependencies": {
+          "System.Data.SQLite.Core": "1.0.119"
+        },
+        "runtime": {
+          "ClipBoardHistory.dll": {}
+        }
+      },
       "Stub.System.Data.SQLite.Core.NetStandard/1.0.119": {
         "runtime": {
           "lib/netstandard2.1/System.Data.SQLite.dll": {
@@ -44,6 +52,11 @@
     }
   },
   "libraries": {
+    "ClipBoardHistory/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
     "Stub.System.Data.SQLite.Core.NetStandard/1.0.119": {
       "type": "package",
       "serviceable": true,

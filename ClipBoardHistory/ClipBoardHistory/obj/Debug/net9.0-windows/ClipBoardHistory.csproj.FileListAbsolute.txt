@@ -1,4 +1,3 @@
-C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.UI.Program.resources
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.csproj.GenerateResource.cache
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.AssemblyInfoInputs.cache
@@ -6,3 +5,20 @@ C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHi
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.csproj.CoreCompileInputs.cache
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.sourcelink.json
 C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.UI.Form1.resources
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.csproj.AssemblyReference.cache
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\ClipBoardHistory.exe
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\ClipBoardHistory.deps.json
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\ClipBoardHistory.runtimeconfig.json
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\ClipBoardHistory.dll
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\ClipBoardHistory.pdb
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\System.Data.SQLite.dll
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\runtimes\linux-x64\native\SQLite.Interop.dll
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\runtimes\osx-x64\native\SQLite.Interop.dll
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\runtimes\win-x64\native\SQLite.Interop.dll
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\bin\Debug\net9.0-windows\runtimes\win-x86\native\SQLite.Interop.dll
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoar.1BC5BDDE.Up2Date
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.dll
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\refint\ClipBoardHistory.dll
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.pdb
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ClipBoardHistory.genruntimeconfig.cache
+C:\Users\wamos\Documents\MyProject\ClipBoardHestory\ClipBoardHistory\ClipBoardHistory\ClipBoardHistory\obj\Debug\net9.0-windows\ref\ClipBoardHistory.dll

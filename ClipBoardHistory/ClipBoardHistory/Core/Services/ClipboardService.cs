@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Linq; // ★★★ 修正: LINQ拡張メソッド (ToArray) を使用するために追加 ★★★
 using ClipBoardHistory.Core;
 using ClipBoardHistory.Models;
 
@@ -84,17 +85,12 @@ namespace ClipBoardHistory.Services
             // 複数のイベントが同時に発生しないようにロック
             lock (_lock)
             {
-                IDataObject? data = null;
+                // 注: WinFormsでは、クリップボードへのアクセス（Clipboard.GetXxx）は通常STAスレッドでの実行が必要です。
+                // Application.Run()が動いているメインスレッド以外からアクセスすると、COM例外が発生する可能性があります。
+                // 暫定的にこのままとしますが、実運用ではメインスレッドに処理を移譲するInvokeやTryGetClipboardDataのようなラッパーが必要です。
+
                 try
                 {
-                    // クリップボードからデータを取得
-                    // 注: STAスレッドでの実行が必要なため、ClipboardMonitor内でInvokeを使用するか、
-                    // または、この処理を別スレッドで実行する場合は TryGetClipboardData を使用する。
-                    // .NET Formsでは通常、このTask.Run内で Clipboard.GetDataObject() を直接呼び出すと失敗するため、
-                    // ここでは簡単なデータ形式のみをチェックする簡略版を記述します。
-                    // 実際の実装では、STAスレッドを確保する処理が必要になります。
-
-                    // 暫定的にメインスレッドを確保せずに使用可能な形式をチェック
                     if (Clipboard.ContainsText())
                     {
                         var text = Clipboard.GetText();
@@ -168,7 +164,8 @@ namespace ClipBoardHistory.Services
         {
             string fileName = $"{Guid.NewGuid()}.txt";
             string fullPath = Path.Combine(DatabaseConstants.DataCacheDirectory, fileName);
-            File.WriteAllLines(fullPath, files.ToArray());
+            // ★★★ 修正: ToArray()を使用するためにLINQが必要でした ★★★
+            File.WriteAllLines(fullPath, files.Cast<string>().ToArray());
             return fullPath;
         }
 
