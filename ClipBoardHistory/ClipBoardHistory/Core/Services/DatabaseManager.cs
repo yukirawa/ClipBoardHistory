@@ -33,6 +33,8 @@ public class DatabaseManager
         // テーブル作成のSQL
         // 高速化のため、SearchIndexにもインデックスを貼る想定（今回は簡易実装）
         const string createTableSql = @"
+            PRAGMA journal_mode = WAL;
+            PRAGMA synchronous = NORMAL;
             CREATE TABLE IF NOT EXISTS History (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 Content TEXT,
@@ -42,6 +44,7 @@ public class DatabaseManager
                 SearchIndex TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_created_at ON History(CreatedAt DESC);
+            CREATE INDEX IF NOT EXISTS idx_search_index ON History(SearchIndex);
         ";
 
         ExecuteNonQuery(createTableSql);

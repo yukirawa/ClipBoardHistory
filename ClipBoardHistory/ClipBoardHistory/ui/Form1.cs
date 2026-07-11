@@ -1,27 +1,32 @@
 using System;
-using System.Collections.Generic; // List—p
+using System.Collections.Generic; // Listï¿½p
 using System.Drawing;
+using System.IO;
+using System.Security.Cryptography;
 using System.Windows.Forms;
+using ClipBoardHistory.Core;
 using ClipBoardHistory.Core.Models;
 using ClipBoardHistory.Core.Services;
-using ClipBoardHistory.UI.Controls; // HistoryCard‚ðŽg‚¤‚½‚ß
+using ClipBoardHistory.UI.Controls; // HistoryCardï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 namespace ClipBoardHistory
 {
     public partial class Form1 : Form
     {
+        private const int MaxVisibleItems = 20;
         private readonly ClipboardMonitor _monitor;
         private readonly DatabaseManager _dbManager;
+        private string? _lastClipboardSignature;
 
-        // ƒJ[ƒh‚ð•À‚×‚éƒRƒ“ƒeƒi
-        private FlowLayoutPanel _flowLayoutPanel;
+        // ï¿½Jï¿½[ï¿½hï¿½ï¿½ï¿½ï¿½×‚ï¿½Rï¿½ï¿½ï¿½eï¿½i
+        private FlowLayoutPanel _flowLayoutPanel = null!;
 
         public Form1()
         {
             InitializeComponent();
-            SetupLayout(); // ƒŒƒCƒAƒEƒg\’z
+            SetupLayout(); // ï¿½ï¿½ï¿½Cï¿½Aï¿½Eï¿½gï¿½\ï¿½z
 
-            // --- Core‚Ì‰Šú‰» (‘O‰ñ‚Ì‚Ü‚Ü) ---
+            // --- Coreï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½Oï¿½ï¿½Ì‚Ü‚ï¿½) ---
             _dbManager = new DatabaseManager();
             try { _dbManager.Initialize(); } catch { }
 
@@ -30,17 +35,17 @@ namespace ClipBoardHistory
             this.FormClosing += (s, e) => _monitor.Dispose();
         }
 
-        // UI‚Ì”z’uiReact‚Ì render ‚Ì‚æ‚¤‚È‚à‚Ìj
+        // UIï¿½Ì”zï¿½uï¿½iReactï¿½ï¿½ render ï¿½Ì‚æ‚¤ï¿½È‚ï¿½ï¿½Ìj
         private void SetupLayout()
         {
-            this.Size = new Size(900, 600); // ƒEƒBƒ“ƒhƒEƒTƒCƒY
+            this.Size = new Size(900, 600); // ï¿½Eï¿½Bï¿½ï¿½ï¿½hï¿½Eï¿½Tï¿½Cï¿½Y
 
-            // 1. ƒJ[ƒh‚ð•À‚×‚éƒGƒŠƒA (FlowLayoutPanel)
+            // 1. ï¿½Jï¿½[ï¿½hï¿½ï¿½ï¿½ï¿½×‚ï¿½Gï¿½ï¿½ï¿½A (FlowLayoutPanel)
             _flowLayoutPanel = new FlowLayoutPanel
             {
-                Dock = DockStyle.Fill, // ‰æ–Ê‚¢‚Á‚Ï‚¢‚ÉL‚°‚é
-                AutoScroll = true,     // ƒXƒNƒ[ƒ‹ƒo[‚ðŽ©“®•\Ž¦
-                BackColor = Color.FromArgb(240, 240, 240), // ”wŒiFi”–‚¢ƒOƒŒ[j
+                Dock = DockStyle.Fill, // ï¿½ï¿½Ê‚ï¿½ï¿½ï¿½ï¿½Ï‚ï¿½ï¿½ÉLï¿½ï¿½ï¿½ï¿½
+                AutoScroll = true,     // ï¿½Xï¿½Nï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½oï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½
+                BackColor = Color.FromArgb(240, 240, 240), // ï¿½wï¿½iï¿½Fï¿½iï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½[ï¿½j
                 Padding = new Padding(10)
             };
 
@@ -51,36 +56,26 @@ namespace ClipBoardHistory
         {
             base.OnLoad(e);
             _monitor.Start();
-            LoadHistory(); // ‹N“®Žž‚É—š—ð‚ð•\Ž¦
+            LoadHistory(); // ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½É—ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½
         }
 
-        // DB‚©‚çƒf[ƒ^‚ð“Ç‚Ýž‚ñ‚Å•\Ž¦‚·‚éiReact‚Ì useEffect -> setState “I‚Èˆ—j
+        // DBï¿½ï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½ï¿½Ç‚Ýï¿½ï¿½ï¿½Å•\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½iReactï¿½ï¿½ useEffect -> setState ï¿½Iï¿½Èï¿½ï¿½ï¿½ï¿½j
         private void LoadHistory()
         {
-            var items = _dbManager.GetRecentItems(20); // ÅV20ŒŽæ“¾
+            var items = _dbManager.GetRecentItems(MaxVisibleItems); // ï¿½ÅV20ï¿½ï¿½ï¿½æ“¾
 
-            _flowLayoutPanel.SuspendLayout(); // •`‰æ‚ðˆêŽž’âŽ~i‚‘¬‰»j
-            _flowLayoutPanel.Controls.Clear(); // ˆê’UƒNƒŠƒA
+            _flowLayoutPanel.SuspendLayout(); // ï¿½`ï¿½ï¿½ï¿½ï¿½êŽžï¿½ï¿½~ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½j
+            _flowLayoutPanel.Controls.Clear(); // ï¿½ï¿½Uï¿½Nï¿½ï¿½ï¿½A
 
             foreach (var item in items)
             {
-                // ƒRƒ“ƒ|[ƒlƒ“ƒg¶¬
-                var card = new HistoryCard();
-                card.SetData(item); // props‚ð“n‚·
-
-                // ƒNƒŠƒbƒNƒCƒxƒ“ƒgiÚ×•\Ž¦‚È‚Ç—pj
-                card.Click += (s, ev) =>
-                {
-                    MessageBox.Show(item.Content); // ‚Æ‚è‚ ‚¦‚¸ƒƒbƒZ[ƒWƒ{ƒbƒNƒX‚ÅŠm”F
-                };
-
-                _flowLayoutPanel.Controls.Add(card); // ‰æ–Ê‚É’Ç‰Á
+                _flowLayoutPanel.Controls.Add(CreateHistoryCard(item)); // ï¿½ï¿½Ê‚É’Ç‰ï¿½
             }
 
-            _flowLayoutPanel.ResumeLayout(); // •`‰æÄŠJ
+            _flowLayoutPanel.ResumeLayout(); // ï¿½`ï¿½ï¿½ÄŠJ
         }
 
-        // ƒNƒŠƒbƒvƒ{[ƒh•ÏXŒŸ’mŽž
+        // ï¿½Nï¿½ï¿½ï¿½bï¿½vï¿½{ï¿½[ï¿½hï¿½ÏXï¿½ï¿½ï¿½mï¿½ï¿½
         private void Monitor_ClipboardChanged(object? sender, EventArgs e)
         {
             if (this.InvokeRequired)
@@ -97,30 +92,117 @@ namespace ClipBoardHistory
         {
             try
             {
-                if (Clipboard.ContainsText())
+                if (!TryCreateHistoryItem(out var item, out var signature))
                 {
-                    string text = Clipboard.GetText();
-                    if (string.IsNullOrEmpty(text)) return;
-
-                    var item = new HistoryItem
-                    {
-                        Content = text,
-                        Type = ClipboardItemType.Text,
-                        CreatedAt = DateTime.Now,
-                        SearchIndex = text
-                    };
-
-                    _dbManager.Save(item);
-
-                    // •Û‘¶‚µ‚½‚çƒŠƒXƒg‚ðÄ“Ç‚Ýž‚Ý‚µ‚Ä•\Ž¦XV
-                    // (React‚È‚ç state XV‚ÅÄƒŒƒ“ƒ_ƒŠƒ“ƒO‚³‚ê‚é‚Æ‚±‚ë)
-                    LoadHistory();
+                    return;
                 }
+
+                if (_lastClipboardSignature == signature)
+                {
+                    return;
+                }
+
+                _lastClipboardSignature = signature;
+                _dbManager.Save(item);
+                AddHistoryCard(item, prepend: true);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
+        }
+
+        private HistoryCard CreateHistoryCard(HistoryItem item)
+        {
+            var card = new HistoryCard();
+            card.SetData(item);
+            card.Click += (s, ev) => MessageBox.Show(item.Content);
+            return card;
+        }
+
+        private void AddHistoryCard(HistoryItem item, bool prepend)
+        {
+            var card = CreateHistoryCard(item);
+
+            _flowLayoutPanel.SuspendLayout();
+            _flowLayoutPanel.Controls.Add(card);
+            if (prepend)
+            {
+                _flowLayoutPanel.Controls.SetChildIndex(card, 0);
+            }
+
+            while (_flowLayoutPanel.Controls.Count > MaxVisibleItems)
+            {
+                var lastIndex = _flowLayoutPanel.Controls.Count - 1;
+                var control = _flowLayoutPanel.Controls[lastIndex];
+                _flowLayoutPanel.Controls.RemoveAt(lastIndex);
+                control.Dispose();
+            }
+            _flowLayoutPanel.ResumeLayout();
+        }
+
+        private bool TryCreateHistoryItem(out HistoryItem item, out string signature)
+        {
+            item = new HistoryItem();
+            signature = string.Empty;
+
+            if (Clipboard.ContainsText())
+            {
+                var text = Clipboard.GetText();
+                if (string.IsNullOrEmpty(text))
+                {
+                    return false;
+                }
+
+                item = new HistoryItem
+                {
+                    Content = text,
+                    Type = ClipboardItemType.Text,
+                    CreatedAt = DateTime.Now,
+                    SearchIndex = text
+                };
+                signature = $"text:{text}";
+                return true;
+            }
+
+            if (Clipboard.ContainsImage())
+            {
+                using var image = Clipboard.GetImage();
+                if (image == null)
+                {
+                    return false;
+                }
+
+                var (imagePath, hash) = SaveImageToCache(image);
+                item = new HistoryItem
+                {
+                    Content = "[Image]",
+                    Type = ClipboardItemType.Image,
+                    CreatedAt = DateTime.Now,
+                    ImagePath = imagePath,
+                    SearchIndex = hash
+                };
+                signature = $"image:{hash}";
+                return true;
+            }
+
+            return false;
+        }
+
+        private static (string path, string hash) SaveImageToCache(Image image)
+        {
+            using var memoryStream = new MemoryStream();
+            image.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+            var bytes = memoryStream.ToArray();
+            var hash = Convert.ToHexString(SHA256.HashData(bytes));
+            var filePath = Path.Combine(DatabaseConstants.ImageCacheFolder, $"{hash}.png");
+
+            if (!File.Exists(filePath))
+            {
+                File.WriteAllBytes(filePath, bytes);
+            }
+
+            return (filePath, hash);
         }
     }
 }
