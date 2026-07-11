@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "4zmvsTlBTRg=",
+  "dgSpecHash": "G1BJykmWA8Q=",
   "success": true,
-  "projectFilePath": "C:\\Users\\wamos\\Documents\\MyProject\\ClipBoardHestory\\ClipBoardHistory\\ClipBoardHistory\\ClipBoardHistory\\ClipBoardHistory.csproj",
+  "projectFilePath": "/home/runner/work/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\wamos\\.nuget\\packages\\stub.system.data.sqlite.core.netstandard\\1.0.119\\stub.system.data.sqlite.core.netstandard.1.0.119.nupkg.sha512",
-    "C:\\Users\\wamos\\.nuget\\packages\\system.data.sqlite.core\\1.0.119\\system.data.sqlite.core.1.0.119.nupkg.sha512"
+    "/home/runner/.nuget/packages/stub.system.data.sqlite.core.netstandard/1.0.119/stub.system.data.sqlite.core.netstandard.1.0.119.nupkg.sha512",
+    "/home/runner/.nuget/packages/system.data.sqlite.core/1.0.119/system.data.sqlite.core.1.0.119.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.windowsdesktop.app.ref/9.0.17/microsoft.windowsdesktop.app.ref.9.0.17.nupkg.sha512"
   ],
   "logs": []
 }
