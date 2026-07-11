@@ -1,12 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "G1BJykmWA8Q=",
+  "dgSpecHash": "6TVljgGPp88=",
   "success": true,
   "projectFilePath": "/home/runner/work/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory.csproj",
   "expectedPackageFiles": [
-    "/home/runner/.nuget/packages/stub.system.data.sqlite.core.netstandard/1.0.119/stub.system.data.sqlite.core.netstandard.1.0.119.nupkg.sha512",
-    "/home/runner/.nuget/packages/system.data.sqlite.core/1.0.119/system.data.sqlite.core.1.0.119.nupkg.sha512",
-    "/home/runner/.nuget/packages/microsoft.windowsdesktop.app.ref/9.0.17/microsoft.windowsdesktop.app.ref.9.0.17.nupkg.sha512"
+    "/tmp/codeql-scratch-36113825c4e81d55/dbs/csharp/working/packages/stub.system.data.sqlite.core.netstandard/1.0.119/stub.system.data.sqlite.core.netstandard.1.0.119.nupkg.sha512",
+    "/tmp/codeql-scratch-36113825c4e81d55/dbs/csharp/working/packages/system.data.sqlite.core/1.0.119/system.data.sqlite.core.1.0.119.nupkg.sha512",
+    "/tmp/codeql-scratch-36113825c4e81d55/dbs/csharp/working/packages/microsoft.netcore.app.ref/9.0.17/microsoft.netcore.app.ref.9.0.17.nupkg.sha512",
+    "/tmp/codeql-scratch-36113825c4e81d55/dbs/csharp/working/packages/microsoft.windowsdesktop.app.ref/9.0.17/microsoft.windowsdesktop.app.ref.9.0.17.nupkg.sha512",
+    "/tmp/codeql-scratch-36113825c4e81d55/dbs/csharp/working/packages/microsoft.aspnetcore.app.ref/9.0.17/microsoft.aspnetcore.app.ref.9.0.17.nupkg.sha512",
+    "/tmp/codeql-scratch-36113825c4e81d55/dbs/csharp/working/packages/microsoft.netcore.app.host.linux-x64/9.0.17/microsoft.netcore.app.host.linux-x64.9.0.17.nupkg.sha512"
   ],
   "logs": []
 }

@@ -81,7 +81,7 @@
     ]
   },
   "packageFolders": {
-    "/home/runner/.nuget/packages/": {}
+    "/tmp/codeql-scratch-36113825c4e81d55/dbs/csharp/working/packages": {}
   },
   "project": {
     "version": "1.0.0",
@@ -89,7 +89,7 @@
       "projectUniqueName": "/home/runner/work/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory.csproj",
       "projectName": "ClipBoardHistory",
       "projectPath": "/home/runner/work/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory.csproj",
-      "packagesPath": "/home/runner/.nuget/packages/",
+      "packagesPath": "/tmp/codeql-scratch-36113825c4e81d55/dbs/csharp/working/packages",
       "outputPath": "/home/runner/work/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory/ClipBoardHistory/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
@@ -142,6 +142,18 @@
         "assetTargetFallback": true,
         "warn": true,
         "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[9.0.17, 9.0.17]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.linux-x64",
+            "version": "[9.0.17, 9.0.17]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[9.0.17, 9.0.17]"
+          },
           {
             "name": "Microsoft.WindowsDesktop.App.Ref",
             "version": "[9.0.17, 9.0.17]"
